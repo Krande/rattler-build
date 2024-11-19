@@ -189,6 +189,15 @@ pub struct CommonOpts {
     /// Path to an auth-file to read authentication information from
     #[clap(long, env = "RATTLER_AUTH_FILE", hide = true)]
     pub auth_file: Option<PathBuf>,
+
+    /// Output directory for build artifacts.
+    #[clap(
+        long,
+        env = "CONDA_TEST_PATH",
+        verbatim_doc_comment,
+        help_heading = "Modifying result"
+    )]
+    pub test_dir: Option<PathBuf>,
 }
 
 /// Container for the CLI package format and compression level

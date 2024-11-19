@@ -184,7 +184,7 @@ pub async fn run_build(
         package_test::run_test(
             &result,
             &TestConfiguration {
-                test_prefix: directories.work_dir.join("test"),
+                test_prefix: directories.work_dir.join("test_env"),
                 target_platform: Some(output.build_configuration.target_platform),
                 host_platform: Some(output.build_configuration.host_platform.clone()),
                 current_platform: output.build_configuration.build_platform.clone(),
@@ -196,6 +196,7 @@ pub async fn run_build(
                 channel_priority: ChannelPriority::Strict,
                 solve_strategy: SolveStrategy::Highest,
                 tool_configuration: tool_configuration.clone(),
+                work_dir: Some(directories.work_dir.join("work")),
             },
             None,
         )

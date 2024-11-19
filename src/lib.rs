@@ -489,6 +489,7 @@ pub async fn run_test_from_args(
         channel_priority: ChannelPriority::Strict,
         solve_strategy: SolveStrategy::Highest,
         tool_configuration: tool_config,
+        work_dir: args.common.test_dir
     };
 
     let package_name = package_file

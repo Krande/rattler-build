@@ -210,6 +210,8 @@ pub struct TestConfiguration {
     pub solve_strategy: SolveStrategy,
     /// The tool configuration
     pub tool_configuration: tool_configuration::Configuration,
+    /// Work directory
+    pub work_dir: Option<PathBuf>,
 }
 
 fn env_vars_from_package(index_json: &IndexJson) -> HashMap<String, String> {
@@ -560,10 +562,25 @@ impl PythonTest {
             interpreter: Some("python".into()),
             ..Script::default()
         };
+        // Determine the work_dir
+        let work_dir = if let Some(ref dir) = config.work_dir {
+            // If work_dir is set, use it
+            dir.clone()
+        } else {
+            // Otherwise, create a temporary directory
+            let tmp_dir = tempfile::tempdir()?;
+            let tmp_path = tmp_dir.path().to_path_buf(); // Convert to PathBuf
 
-        let tmp_dir = tempfile::tempdir()?;
+            tmp_path
+        };
+
+        if !work_dir.exists() {
+            std::fs::create_dir_all(&work_dir)?;
+        }
+
+        // if config.work_dir is not set, use tempfile::tempdir()?;
         script
-            .run_script(Default::default(), tmp_dir.path(), path, prefix, None, None)
+            .run_script(Default::default(), work_dir.as_ref(), work_dir.as_ref(), prefix, None, None)
             .await
             .map_err(|e| TestError::TestFailed(e.to_string()))?;
 
@@ -573,12 +590,13 @@ impl PythonTest {
         );
 
         if self.pip_check {
+            tracing::info!("Running `pip check` test");
             let script = Script {
                 content: ScriptContent::Command("pip check".into()),
                 ..Script::default()
             };
             script
-                .run_script(Default::default(), path, path, prefix, None, None)
+                .run_script(Default::default(), work_dir.as_ref(), work_dir.as_ref(), prefix, None, None)
                 .await
                 .map_err(|e| TestError::TestFailed(e.to_string()))?;
 
